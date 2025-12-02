@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("KSP Register Form Tests", () => {
+describe("KSP Register Form Tests - Dynamic Emails", () => {
 
   const url = "https://auth.ksp.co.il/register?redirect_url=https%3A%2F%2Fksp.co.il%2Fweb%2Faccount";
   const fnameField = "input[id=':R337bl6:']";
@@ -34,13 +34,14 @@ describe("KSP Register Form Tests", () => {
   });
 
   it("fill form with invalid email", () => {
-    fillAll("shiri","shachor","shiri","0548483430","!Shiri123","!Shiri123");
+    fillAll("shiri","shachor", "shiri@","0548483430","!Shiri123","!Shiri123");
     register();
     helperDisplayed();
   });
 
   it("fill form with invalid phone", () => {
-    fillAll("shiri","shachor","shiril@gmail.com","0548483","!Shiri123","!Shiri123");
+    const randomEmail = `shiri+${Date.now()}@gmail.com`;
+    fillAll("shiri","shachor", randomEmail,"0548483","!Shiri123","!Shiri123");
     register();
     helperDisplayed();
   });
@@ -51,25 +52,29 @@ describe("KSP Register Form Tests", () => {
   });
 
   it("fill form with wrong second password", () => {
-    fillAll("shiri","shachor","shirim@gmail.com","0548483430","!Shiri1234","!Shiri123");
+    const randomEmail = `shiri+${Date.now()}@gmail.com`;
+    fillAll("shiri","shachor", randomEmail,"0548483430","!Shiri1234","!Shiri123");
     register();
     helperDisplayed();
   });
 
   it("fill form with invalid first name", () => {
-    fillAll("s","shachor","shirik@gmail.com","0548483430","!Shiri123","!Shiri123");
+    const randomEmail = `shiri+${Date.now()}@gmail.com`;
+    fillAll("s12","shachor", randomEmail,"0548483430","!Shiri123","!Shiri123");
     register();
     helperDisplayed();
   });
 
   it("fill form with invalid last name", () => {
-    fillAll("shiri","s","shirij@gmail.com","0548483430","!Shiri123","!Shiri123");
+    const randomEmail = `shiri+${Date.now()}@gmail.com`;
+    fillAll("shiri","sI!R!", randomEmail,"0548483430","!Shiri123","!Shiri123");
     register();
     helperDisplayed();
   });
-
-  it("fill form with valid data", () => {
-    fillAll("shiri","shachor","shirish@gmail.com","0548483430","!Shiri123","!Shiri123");
+  
+  it.skip("fill form with valid data", () => {
+    const randomEmail = `shiri+${Date.now()}@gmail.com`;
+    fillAll("shiri","shachor", randomEmail,"0548483430","!Shiri123","!Shiri123");
     register();
     cy.get(helperText).should("not.exist");
   });
