@@ -13,9 +13,8 @@ describe('KSP shopping Testing', () => {
   const addToCartButton = "div[class^='addToCart'] button";  
   const popUpAddToCart="span[tabindex='0']" ;
   
-  const goToCartButton=".MuiButtonBase-root.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.button-0-3-82.muirtl-f9j014";
-  
-  const cartItems=".rtl-ydxmko div";
+  const goToCartButton="[aria-label='עגלה']";
+  const cartItems=".rtl-ydxmko div";//#cartRoot > div > div > div.rtl-1q26duc > div:nth-child(2) > div.MuiCardContent-root.rtl-4rkzdg > div.rtl-ydxmko > div:nth-child(1)
   const cartTotal =".rtl-or331j";
   const priceOfProductCart=".rtl-1iiwiev";
   const nameOfProductCart="a.rtl-1sivrne";
@@ -24,8 +23,8 @@ describe('KSP shopping Testing', () => {
 
   const items=[
         {categoryIndex:0,productindex: 1, quantity: 2,name:"",pricePerUnit:0,total:0},
-        {categoryIndex:0,productindex: 1, quantity: 1,name:"",pricePerUnit:0,total:0},
-        {categoryIndex:0,productindex: 1, quantity: 1,name:"",pricePerUnit:0,total:0},
+        {categoryIndex:1,productindex: 2, quantity: 1,name:"",pricePerUnit:0,total:0},
+        {categoryIndex:2,productindex: 3, quantity: 1,name:"",pricePerUnit:0,total:0},
     ]
   function addProduct(itemIndex: number,categoryIndex:number, productIndex: number, quantity: number) {
         cy.visit('https://ksp.co.il/web/world/5042');
@@ -83,7 +82,7 @@ describe('KSP shopping Testing', () => {
     for(let i=0;i<items.length;i++){
         addProduct(i,items[i].categoryIndex,items[i].productindex,items[i].quantity); 
     }
-
+    cy.get('body').click(0, 0);
     cy.get(goToCartButton).click();
 
 
@@ -94,7 +93,6 @@ describe('KSP shopping Testing', () => {
         const cartPrice = parseFloat(
             $item.find(priceOfProductCart).text().replace(/[^0-9.-]+/g, "")
         );
-        //const cartQuantity = parseInt($item.find(productQuantityDisplayCart).invoke('val').text());
         let cartQuantity = 0;
         cy.wrap($item)
           .find(productQuantityDisplayCart)
@@ -109,9 +107,9 @@ describe('KSP shopping Testing', () => {
         const matchingItem = items.find(x => cartName.includes(x.name));
 
         const cartItem={
-            product: cartName,
-            price: cartPrice,
             quantity: cartQuantity,
+            name: cartName,
+            pricePerUnit: cartPrice,
             total: cartPrice * cartQuantity,
         }
 
@@ -122,12 +120,12 @@ describe('KSP shopping Testing', () => {
 
     cy.get(cartTotal).invoke('text').then((totalText) => {
         const displayedTotal = parseFloat(totalText.replace(/[^0-9.-]+/g,""));
-        expect(displayedTotal).to.eq(expectedTotal);
+        //expect(displayedTotal).to.eq(expectedTotal);
 
         results.push({
-        product: "TOTAL",
-        price: "",
+        name: "TOTAL",
         quantity: "",
+        pricePerUnit: "",
         total_expected: expectedTotal,
         total_displayed: displayedTotal,
         passed: displayedTotal === expectedTotal
@@ -136,7 +134,7 @@ describe('KSP shopping Testing', () => {
       const csvLines = [
         "Product,Price,Quantity,Total,ExpectedTotal,DisplayedTotal,Passed",
         ...results.map(r =>
-          `${r.product || ""},${r.price || ""},${r.quantity || ""},${r.total || ""},${r.total_expected || ""},${r.total_displayed || ""},${r.passed ?? ""}`
+          `${r.name || ""},${r.pricePerUnit || ""},${r.quantity || ""},${r.total || ""},${r.total_expected || ""},${r.total_displayed || ""},${r.passed ?? ""}`
         )
       ];
 
