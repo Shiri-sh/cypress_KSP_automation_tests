@@ -1,83 +1,88 @@
 /// <reference types="cypress" />
-
+Cypress.on('uncaught:exception',(err) => {
+   return false;
+})
 describe('KSP shopping Testing', () => {
   const categoryList = "div[class^='categories'] a";
-  const productList = "div[class^='products'] a";
-  const quantityIncreaseButton = ".sign-0-3-262.sign-d0-0-3-265.null svg";
+  const productList = "div[class^='products'] div[class^='product']";
+  const productLink="a[class^='productTitle']"; 
+  const productName="h1[aria-label] span";
+  const productPrice="div[class^='currentPrice']";
+  const quantityIncreaseButton = "svg[aria-label='לחץ להגדלת כמות']";
   const productQuantityDisplay = "div[class^='quantity']";
-  const addToCartButton = ".MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedSecondary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorSecondary.MuiButton-root.MuiButton-contained.MuiButton-containedSecondary.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorSecondary.muirtl-4w0j7a";
-  const cartQuantityIcon="span.MuiBadge-badge.MuiBadge-standard.MuiBadge-anchorOriginTopRight.MuiBadge-anchorOriginTopRightRectangular.MuiBadge-overlapRectangular.MuiBadge-colorSecondary.muirtl-yg8mj6";
+  const addToCartButton = "div[class^='addToCart'] button";  
   const popUpAddToCart="span[tabindex='0']" ;
+  
   const goToCartButton=".MuiButtonBase-root.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.button-0-3-82.muirtl-f9j014";
+  
   const cartItems=".rtl-ydxmko div";
   const cartTotal =".rtl-or331j";
-  const priceOfProduct=".rtl-1iiwiev";
-  const nameOfProduct="a.rtl-1sivrne";
+  const priceOfProductCart=".rtl-1iiwiev";
+  const nameOfProductCart="a.rtl-1sivrne";
+  const productQuantityDisplayCart="[name='quantity']";
+
+
+  const items=[
+        {categoryIndex:0,productindex: 1, quantity: 2,name:"",pricePerUnit:0,total:0},
+        {categoryIndex:0,productindex: 1, quantity: 1,name:"",pricePerUnit:0,total:0},
+        {categoryIndex:0,productindex: 1, quantity: 1,name:"",pricePerUnit:0,total:0},
+    ]
+  function addProduct(itemIndex: number,categoryIndex:number, productIndex: number, quantity: number) {
+        cy.visit('https://ksp.co.il/web/world/5042');
+        cy.wait(4000);
+        
+      return cy.get(categoryList).eq(categoryIndex).click({force: true})
+      .then(() => {
+        return cy.get(productList)
+          .eq(productIndex)
+          .find(productPrice)
+          .invoke('text')
+          .then((text) => {
+            const price = parseFloat(text.replace(/[^0-9.-]+/g, ""));
+            items[itemIndex].pricePerUnit = price;
+            items[itemIndex].total = price * quantity;
+            cy.log('Total: ' + items[itemIndex].total, 'Price: ' + items[itemIndex].pricePerUnit);
+          });
+      })
+      .then(() => {
+        return cy.get(productList).eq(productIndex).find(productLink).invoke('text').then((text) => {
+          items[itemIndex].name = text;
+          cy.log('Name: ' + items[itemIndex].name);
+        });
+      })
+      .then(() => {
+        return cy.get(productList).eq(productIndex).find(productLink).click({force:true});
+      })
+      .then(() => {
+        for (let j = 1; j < quantity; j++) {
+          cy.get(quantityIncreaseButton).first().click();
+        }
+
+      })
+      .then(() => {
+        //cy.screenshot('cart', {capture: 'viewport'});
+        cy.get(addToCartButton).first().click();
+        cy.wait(1000);
+        cy.get(popUpAddToCart).should('be.visible');
+        //cy.screenshot('cart', {capture: 'viewport'});
+      });
+  }
+
+  function compareItems(expected: any, actual: any){ 
+    expect(actual.product.trim()).to.eq(expected.name.trim());
+    expect(actual.price).to.eq(expected.pricePerUnit);
+    expect(actual.quantity).to.eq(expected.quantity);
+    expect(actual.total).to.eq(expected.total);
+  }
+
   it('adds items to the cart', () => {
-    const items=[
-        {index:0,quantity:1}, 
-        {index:1,quantity:2},
-        {index:2,quantity:1}
-    ]; 
+    
     const results: any[] = [];
     let expectedTotal = 0;
 
-    // cy.wrap(items).each((i: {index: number, quantity: number}) => {
-    //   cy.visit('https://ksp.co.il/web/world/5042');
-
-    //   cy.wait(1000);
-
-    //   cy.get(categoryList).eq(i.index).click({force: true});
-
-    //   cy.wait(1000);
-
-    //   cy.get(productList).eq(i.index).click({force:true});
-      
-    //     for (let j = 1; j < i.quantity; j++) {
-    //          cy.get(quantityIncreaseButton).click();
-    //     }
-
-    //     //cy.screenshot('cart', {capture: 'viewport'});
-    //     cy.get(addToCartButton).click();
-
-    //     cy.wait(1000);
-
-    //     cy.get(popUpAddToCart).should('be.visible');
-
-    //     cy.wait(1000);
-    //     //cy.screenshot('cart', {capture: 'viewport'});
-
-    // });
-
-    cy.visit('https://ksp.co.il/web/world/5042');
-    cy.get(categoryList).eq(0).click({force: true});
-    cy.get(productList).eq(0).click({force:true});
-    cy.get(quantityIncreaseButton).click();
-    cy.get(addToCartButton).click();
-    cy.get(addToCartButton).click();
-    cy.get(popUpAddToCart).should('be.visible');
-
-    
-    cy.visit('https://ksp.co.il/web/world/5042');
-    cy.get(categoryList).eq(1).click({force: true});
-    cy.get(productList).eq(1).click({force:true});
-    cy.get(addToCartButton).click();
-    cy.get(addToCartButton).click();
-    cy.get(popUpAddToCart).should('be.visible');
-
-    
-    cy.visit('https://ksp.co.il/web/world/5042');
-    cy.get(categoryList).eq(2).click({force: true});
-    cy.get(productList).eq(2).click({force:true});
-    cy.get(addToCartButton).click();
-    cy.get(addToCartButton).click();
-    cy.get(popUpAddToCart).should('be.visible');
-
-    
-
-
-
-
+    for(let i=0;i<items.length;i++){
+        addProduct(i,items[i].categoryIndex,items[i].productindex,items[i].quantity); 
+    }
 
     cy.get(goToCartButton).click();
 
@@ -85,19 +90,34 @@ describe('KSP shopping Testing', () => {
     cy.get(cartItems).should('have.length', items.length);
 
     cy.get(cartItems).each(($item, index) => {
-        const name=$item.find(nameOfProduct).text();
-        const priceText = $item.find(priceOfProduct).text();
+        const cartName = $item.find(nameOfProductCart).text();
+        const cartPrice = parseFloat(
+            $item.find(priceOfProductCart).text().replace(/[^0-9.-]+/g, "")
+        );
+        //const cartQuantity = parseInt($item.find(productQuantityDisplayCart).invoke('val').text());
+        let cartQuantity = 0;
+        cy.wrap($item)
+          .find(productQuantityDisplayCart)
+          .invoke('val')
+          .then(quantityValue => {
+               cartQuantity = parseInt(quantityValue as string);
+            // המשך הקוד שלך
+          });
 
-        const price = parseFloat(priceText.replace(/[^0-9.-]+/g,""));
-        const quantity = items[index].quantity;
-        expectedTotal += price * quantity;
-        
-        results.push({
-            product: name,
-            price: price,
-            quantity: quantity,
-            total: price * quantity
-        });
+        expectedTotal += cartPrice * cartQuantity;
+
+        const matchingItem = items.find(x => cartName.includes(x.name));
+
+        const cartItem={
+            product: cartName,
+            price: cartPrice,
+            quantity: cartQuantity,
+            total: cartPrice * cartQuantity,
+        }
+
+        compareItems(matchingItem,cartItem);
+
+        results.push({... cartItem});
     });
 
     cy.get(cartTotal).invoke('text').then((totalText) => {
