@@ -87,7 +87,11 @@ describe('KSP shopping Testing', () => {
         cy.screenshot(`product-${itemIndex}-added`, { capture: 'viewport' });
       });
   }
-
+  function compareItems(expected: any, actual: any) {
+      expect(actual.quantity).to.eq(expected.quantity);
+      expected(actual.pricePerUnit).to.eq(actual.pricePerUnit);
+      expected(actual.total).to.eq(actual.total);
+  } 
   function cartValidation() {
     let expectedTotal = 0;
     results.length = 0; // אפס את המערך לפני מילוי חדש
@@ -107,14 +111,16 @@ describe('KSP shopping Testing', () => {
             const cartQuantity = parseInt(quantityValue as string);
 
             expectedTotal += cartPrice;
-
+            const matchingItem = items.find((x) => cartName.includes(x.name)); 
+            expect(matchingItem).to.exist; 
+            
             const cartItem = {
               name: cartName,
               quantity: cartQuantity,
               pricePerUnit: cartPrice / cartQuantity,
               total: cartPrice,
             };
-
+            compareItems(matchingItem, cartItem);
             results.push({ ...cartItem });
             cy.log('Name: ' + cartItem.name, 'Quantity: ' + cartItem.quantity, 'Total: ' + cartItem.total, 'Price: ' + cartItem.pricePerUnit);
           });
