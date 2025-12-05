@@ -89,8 +89,8 @@ describe('KSP shopping Testing', () => {
   }
   function compareItems(expected: any, actual: any) {
       expect(actual.quantity).to.eq(expected.quantity);
-      expected(actual.pricePerUnit).to.eq(actual.pricePerUnit);
-      expected(actual.total).to.eq(actual.total);
+      expect(actual.pricePerUnit).to.eq(actual.pricePerUnit);
+      expect(actual.total).to.eq(actual.total);
   } 
   function cartValidation() {
     let expectedTotal = 0;
