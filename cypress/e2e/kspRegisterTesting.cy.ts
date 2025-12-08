@@ -72,7 +72,7 @@ describe("KSP Register Form Tests - Dynamic Emails", () => {
     helperDisplayed();
   });
   
-  it.skip("fill form with valid data", () => {
+  it("fill form with valid data", () => {
     const randomEmail = `shiri+${Date.now()}@gmail.com`;
     fillAll("shiri","shachor", randomEmail,"0548483430","!Shiri123","!Shiri123");
     register();
